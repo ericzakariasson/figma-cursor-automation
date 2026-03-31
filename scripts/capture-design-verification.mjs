@@ -1,5 +1,5 @@
 import { chromium } from "playwright";
-import { mkdir } from "node:fs/promises";
+import { cp, mkdir, readdir, rename, rm } from "node:fs/promises";
 import path from "node:path";
 
 const baseUrl = process.env.CAPTURE_URL ?? "http://127.0.0.1:4173/";
@@ -10,6 +10,7 @@ const rawVideoPath = path.join(videoDir, "home-capture.webm");
 const finalVideoPath = path.join(artifactsDir, "cursor-automation-home-full.webm");
 
 await mkdir(artifactsDir, { recursive: true });
+await rm(videoDir, { recursive: true, force: true });
 await mkdir(videoDir, { recursive: true });
 
 const browser = await chromium.launch({
@@ -35,6 +36,18 @@ const context = await browser.newContext({
 const page = await context.newPage();
 await page.goto(baseUrl, { waitUntil: "networkidle" });
 await page.emulateMedia({ reducedMotion: "reduce" });
+await page.addStyleTag({
+  content: `
+    *,
+    *::before,
+    *::after {
+      animation: none !important;
+      transition: none !important;
+      scroll-behavior: auto !important;
+      caret-color: transparent !important;
+    }
+  `,
+});
 await page.evaluate(async () => {
   if (document.fonts?.ready) {
     await document.fonts.ready;
@@ -43,6 +56,7 @@ await page.evaluate(async () => {
 await page.screenshot({
   path: screenshotPath,
   fullPage: true,
+  animations: "disabled",
 });
 
 await page.mouse.move(120, 120);
@@ -53,16 +67,15 @@ await page.waitForTimeout(500);
 await context.close();
 await browser.close();
 
-const { rename } = await import("node:fs/promises");
 await rename(rawVideoPath, finalVideoPath).catch(async () => {
-  const { readdir, copyFile } = await import("node:fs/promises");
   const files = await readdir(videoDir);
   const firstVideo = files.find((file) => file.endsWith(".webm"));
   if (!firstVideo) {
     throw new Error("Playwright did not produce a video artifact.");
   }
-  await copyFile(path.join(videoDir, firstVideo), finalVideoPath);
+  await cp(path.join(videoDir, firstVideo), finalVideoPath);
 });
+await rm(videoDir, { recursive: true, force: true });
 
 console.log(`Saved screenshot to ${screenshotPath}`);
 console.log(`Saved video to ${finalVideoPath}`);
