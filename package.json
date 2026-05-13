@@ -7,7 +7,8 @@
     "dev": "vite",
     "build": "tsc -b && vite build",
     "preview": "vite preview",
-    "create-webhook": "node scripts/create-webhook.mjs"
+    "create-webhook": "node scripts/create-webhook.mjs",
+    "capture-design-verification": "node scripts/capture-design-verification.mjs"
   },
   "engines": {
     "node": ">=18"
@@ -21,6 +22,7 @@
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
     "@vitejs/plugin-react": "^5.1.4",
+    "playwright": "^1.60.0",
     "prompts": "^2.4.2",
     "tailwindcss": "^4.2.1",
     "typescript": "^5.9.3",
