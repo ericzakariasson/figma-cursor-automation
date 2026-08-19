@@ -1,0 +1,7 @@
+name = "figma-webhook-proxy"
+main = "src/index.js"
+compatibility_date = "2024-01-01"
+
+[vars]
+CURSOR_ENDPOINT = "https://api2.cursor.sh/automations/webhook/1646da76-2cf4-4cc1-ba3f-1c8b8f12bfd3"
+FIGMA_PASSCODE = "52e81cd317b97f201e9a1471ed3b8922"
